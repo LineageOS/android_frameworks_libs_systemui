@@ -196,9 +196,6 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
         }
         if (info.secondLayerIndex < 0 || info.secondLayerIndex >= layerCount) {
             info.secondLayerIndex = INVALID_VALUE;
-        } else if (DISABLE_SECONDS) {
-            foreground.setDrawable(info.secondLayerIndex, null);
-            info.secondLayerIndex = INVALID_VALUE;
         }
 
         if (ATLEAST_T && aid.getMonochrome() instanceof LayerDrawable) {
