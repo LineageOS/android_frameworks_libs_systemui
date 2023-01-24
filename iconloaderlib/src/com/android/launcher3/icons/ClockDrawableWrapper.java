@@ -58,7 +58,7 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
 
     private static final String TAG = "ClockDrawableWrapper";
 
-    private static final boolean DISABLE_SECONDS = true;
+    private static final boolean DISABLE_SECONDS = false;
     private static final int NO_COLOR = -1;
 
     // Time after which the clock icon should check for an update. The actual invalidate
