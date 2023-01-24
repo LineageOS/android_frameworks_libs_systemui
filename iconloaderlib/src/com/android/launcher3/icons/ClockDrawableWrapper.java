@@ -196,9 +196,6 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
         }
         if (info.secondLayerIndex < 0 || info.secondLayerIndex >= layerCount) {
             info.secondLayerIndex = INVALID_VALUE;
-        } else if (DISABLE_SECONDS) {
-            foreground.setDrawable(info.secondLayerIndex, null);
-            info.secondLayerIndex = INVALID_VALUE;
         }
 
         if (ATLEAST_T && aid.getMonochrome() instanceof LayerDrawable) {
@@ -287,7 +284,8 @@ public class ClockDrawableWrapper extends AdaptiveIconDrawable implements Bitmap
 
             if (secondLayerIndex != INVALID_VALUE) {
                 final Drawable second = foregroundDrawable.getDrawable(secondLayerIndex);
-                if (second.setLevel(convertedSecond * LEVELS_PER_SECOND)) {
+                int secondValue = DISABLE_SECONDS ? defaultSecond : convertedSecond;
+                if (second.setLevel(secondValue * LEVELS_PER_SECOND)) {
                     invalidate = true;
                 }
             }
