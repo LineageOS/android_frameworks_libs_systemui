@@ -217,7 +217,7 @@ private constructor(base: AdaptiveIconDrawable, private val animationInfo: Clock
 
         private const val TAG = "ClockDrawableWrapper"
 
-        private const val DISABLE_SECONDS = true
+        private const val DISABLE_SECONDS = false
         private const val NO_COLOR = Color.TRANSPARENT
 
         // Time after which the clock icon should check for an update. The actual invalidate
