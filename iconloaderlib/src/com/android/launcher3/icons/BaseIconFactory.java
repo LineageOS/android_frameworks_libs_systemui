@@ -51,6 +51,8 @@ import java.util.Objects;
  */
 public class BaseIconFactory implements AutoCloseable {
 
+    public static final int CONFIG_HINT_NO_WRAP = 0x1000000;
+
     private static final int DEFAULT_WRAPPER_BACKGROUND = Color.WHITE;
     private static final float LEGACY_ICON_SCALE = .7f * (1f / (1 + 2 * getExtraInsetFraction()));
 
@@ -318,8 +320,31 @@ public class BaseIconFactory implements AutoCloseable {
 
         AdaptiveIconDrawable adaptiveIcon;
         float scale;
+<<<<<<< PATCH SET (1ff607 iconloaderlib: add code for Launcher3 icon pack support)
+        if (shrinkNonAdaptiveIcons && !(icon instanceof AdaptiveIconDrawable)) {
+            EmptyWrapper foreground = new EmptyWrapper();
+            AdaptiveIconDrawable dr = new AdaptiveIconDrawable(
+                    new ColorDrawable(mWrapperBackgroundColor), foreground);
+            dr.setBounds(0, 0, 1, 1);
+            boolean[] outShape = new boolean[1];
+            scale = getNormalizer().getScale(icon, outIconBounds, dr.getIconMask(), outShape);
+            if (!outShape[0] && (icon.getChangingConfigurations() & CONFIG_HINT_NO_WRAP) == 0) {
+                // If there is an alpha on the icon, apply it to the wrapper instead.
+                dr.setAlpha(icon.getAlpha());
+                icon.setAlpha(0xFF);
+
+                foreground.setDrawable(createScaledDrawable(icon, scale * LEGACY_ICON_SCALE));
+                icon = dr;
+                scale = getNormalizer().getScale(icon, outIconBounds, null, null);
+            }
+        } else {
+            scale = getNormalizer().getScale(icon, outIconBounds, null, null);
+        }
+
+=======
         adaptiveIcon = wrapToAdaptiveIcon(icon, outIconBounds);
         scale = getNormalizer().getScale(adaptiveIcon, outIconBounds, null, null);
+>>>>>>> BASE      (2418fd ClockDrawableWrapper: Set DISABLE_SECONDS to false)
         outScale[0] = scale;
         return adaptiveIcon;
     }
