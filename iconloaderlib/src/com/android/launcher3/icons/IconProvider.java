@@ -51,6 +51,8 @@ import androidx.annotation.Nullable;
 import androidx.core.os.BuildCompat;
 
 import com.android.launcher3.util.SafeCloseable;
+import com.android.launcher3.lineage.icon.IconPack; // used for icon pack support in launcher3
+import com.android.launcher3.lineage.icon.providers.IconPackProvider; // used for icon pack support in launcher3
 
 import java.util.Calendar;
 import java.util.function.Supplier;
@@ -128,7 +130,9 @@ public class IconProvider {
         } else if (mClock != null && mClock.getPackageName().equals(packageName)) {
             icon = ClockDrawableWrapper.forPackage(mContext, mClock.getPackageName(), iconDpi, td);
         }
+        icon = getFromIconPack(icon, packageName);
         if (icon == null) {
+            icon = loader.apply(obj, param);
             icon = fallback.get();
             if (ATLEAST_T && icon instanceof AdaptiveIconDrawable && td != null) {
                 AdaptiveIconDrawable aid = (AdaptiveIconDrawable) icon;
@@ -274,7 +278,8 @@ public class IconProvider {
         }
     }
 
-    private class IconChangeReceiver extends BroadcastReceiver implements SafeCloseable {
+    private class IconChangeReceiver extends BroadcastReceiver implements SafeCloseable,
+        SharedPreferences.OnSharedPreferenceChangeListener  {
 
         private final IconChangeListener mCallback;
         private String mIconState;
@@ -288,6 +293,7 @@ public class IconProvider {
             packageFilter.addDataScheme("package");
             packageFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
             mContext.registerReceiver(this, packageFilter, null, handler);
+            Utilities.getPrefs(mContext).registerOnSharedPreferenceChangeListener(this);
 
             if (mCalendar != null || mClock != null) {
                 final IntentFilter filter = new IntentFilter(ACTION_TIMEZONE_CHANGED);
@@ -347,5 +353,35 @@ public class IconProvider {
          * Called when the global icon state changed, which can typically affect all icons
          */
         void onSystemIconStateChanged(String iconState);
+    }
+
+    private Drawable getFromIconPack(Drawable icon, String packageName) {
+        final IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
+        if (iconPack == null) {
+            return null;
+        }
+        final Drawable iconMask = iconPack.getIcon(packageName, null, "");
+        return iconMask == null ? icon : iconMask;
+    }
+        @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (IconPackStore.KEY_ICON_PACK.equals(key)) {
+            notifyChange();
+        }
+    }
+    private synchronized void notifyChange() {
+        if (mCallback != null) {
+            Consumer<Context> callback = mCallback;
+            mCallback = null;
+            MAIN_EXECUTOR.execute(() -> callback.accept(mContext));
+        }
+    }
+    public void unregister() {
+        try {
+            mContext.unregisterReceiver(this);
+            Utilities.getPrefs(mContext).unregisterOnSharedPreferenceChangeListener(this);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to unregister config monitor", e);
+        }
     }
 }
