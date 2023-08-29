@@ -16,6 +16,23 @@
       "message": "code that fits into iconloader that is for https://review.lineageos.org/c/LineageOS/android_packages_apps_Trebuchet/+/365396",
       "revId": "a7e686daecaf32ac352bb6711610b481587005f0",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7e240b97_afaa2f1c",
+        "filename": "iconloaderlib/src/com/android/launcher3/icons/IconProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 5911
+      },
+      "writtenOn": "2023-08-29T10:05:39Z",
+      "side": 1,
+      "message": "whitespaces",
+      "revId": "a7e686daecaf32ac352bb6711610b481587005f0",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
