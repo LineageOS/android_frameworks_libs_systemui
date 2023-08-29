@@ -50,6 +50,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.os.BuildCompat;
 
+import com.android.launcher3.lineage.icon.IconPack;
+import com.android.launcher3.lineage.icon.providers.IconPackProvider;
 import com.android.launcher3.util.SafeCloseable;
 
 import java.util.Calendar;
@@ -128,6 +130,9 @@ public class IconProvider {
         } else if (mClock != null && mClock.getPackageName().equals(packageName)) {
             icon = ClockDrawableWrapper.forPackage(mContext, mClock.getPackageName(), iconDpi, td);
         }
+        // load from icon pack
+        icon = getFromIconPack(icon, packageName);
+        // if icon pack does not have the icon for that app it would load the deafult icon
         if (icon == null) {
             icon = fallback.get();
             if (ATLEAST_T && icon instanceof AdaptiveIconDrawable && td != null) {
@@ -347,5 +352,14 @@ public class IconProvider {
          * Called when the global icon state changed, which can typically affect all icons
          */
         void onSystemIconStateChanged(String iconState);
+    }
+
+    private Drawable getFromIconPack(Drawable icon, String packageName) {
+        final IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
+        if (iconPack == null) {
+            return null;
+        }
+        final Drawable iconMask = iconPack.getIcon(packageName, null, "");
+        return iconMask == null ? icon : iconMask;
     }
 }

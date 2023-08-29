@@ -27,4 +27,8 @@
     <string name="calendar_component_name" translatable="false"></string>
     <string name="clock_component_name" translatable="false"></string>
 
+    <!-- Icon pack -->
+    <!-- Default icon pack package. Set to "android" to use default / original icons -->
+    <string name="icon_pack_default_pkg" translatable="false">android</string>
+
 </resources>
