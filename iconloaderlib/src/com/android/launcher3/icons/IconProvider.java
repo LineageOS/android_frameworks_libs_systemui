@@ -50,6 +50,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.os.BuildCompat;
 
+import com.android.launcher3.lineage.icon.IconPack;
+import com.android.launcher3.lineage.icon.providers.IconPackProvider;
 import com.android.launcher3.util.SafeCloseable;
 
 import java.util.Calendar;
@@ -128,13 +130,17 @@ public class IconProvider {
         } else if (mClock != null && mClock.getPackageName().equals(packageName)) {
             icon = ClockDrawableWrapper.forPackage(mContext, mClock.getPackageName(), iconDpi, td);
         }
+        icon = getFromIconPack(icon, packageName);
         if (icon == null) {
-            icon = fallback.get();
-            if (ATLEAST_T && icon instanceof AdaptiveIconDrawable && td != null) {
-                AdaptiveIconDrawable aid = (AdaptiveIconDrawable) icon;
-                if  (aid.getMonochrome() == null) {
-                    icon = new AdaptiveIconDrawable(aid.getBackground(),
-                            aid.getForeground(), td.loadPaddedDrawable());
+            icon = loader.apply(obj, param);
+            if (icon == null) {
+                icon = fallback.get();
+                if (ATLEAST_T && icon instanceof AdaptiveIconDrawable && td != null) {
+                    AdaptiveIconDrawable aid = (AdaptiveIconDrawable) icon;
+                    if  (aid.getMonochrome() == null) {
+                        icon = new AdaptiveIconDrawable(aid.getBackground(),
+                                aid.getForeground(), td.loadPaddedDrawable());
+                    }
                 }
             }
         }
@@ -274,7 +280,7 @@ public class IconProvider {
         }
     }
 
-    private class IconChangeReceiver extends BroadcastReceiver implements SafeCloseable {
+    private class IconChangeReceiver extends BroadcastReceiver implements SafeCloseable  {
 
         private final IconChangeListener mCallback;
         private String mIconState;
@@ -288,6 +294,7 @@ public class IconProvider {
             packageFilter.addDataScheme("package");
             packageFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
             mContext.registerReceiver(this, packageFilter, null, handler);
+            Utilities.getPrefs(mContext).registerOnSharedPreferenceChangeListener(this);
 
             if (mCalendar != null || mClock != null) {
                 final IntentFilter filter = new IntentFilter(ACTION_TIMEZONE_CHANGED);
@@ -347,5 +354,14 @@ public class IconProvider {
          * Called when the global icon state changed, which can typically affect all icons
          */
         void onSystemIconStateChanged(String iconState);
+    }
+
+    private Drawable getFromIconPack(Drawable icon, String packageName) {
+        final IconPack iconPack = IconPackProvider.loadAndGetIconPack(mContext);
+        if (iconPack == null) {
+            return null;
+        }
+        final Drawable iconMask = iconPack.getIcon(packageName, null, "");
+        return iconMask == null ? icon : iconMask;
     }
 }
