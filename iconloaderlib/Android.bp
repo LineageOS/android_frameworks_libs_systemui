@@ -22,6 +22,7 @@ android_library {
     min_sdk_version: "26",
     static_libs: [
         "androidx.core_core",
+        "Trebuchet"
     ],
     resource_dirs: [
         "res",
