@@ -51,6 +51,23 @@
       "message": "this needs this patch: https://review.lineageos.org/c/LineageOS/android_packages_apps_Trebuchet/+/365502 to build",
       "revId": "5b6490c1684f0dd6e1d6a4c586e2c15f03fea9d7",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aeacde52_22409433",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 29732
+      },
+      "writtenOn": "2023-09-09T07:23:40Z",
+      "side": 1,
+      "message": "I have applied the patch for launcher3, but for some reason SystemUI still doesn\u0027t build, complaining that package `com.android.launcher3.lineage.icon` doesn\u0027t exist. Does this need a clean rebuild or something?",
+      "revId": "5b6490c1684f0dd6e1d6a4c586e2c15f03fea9d7",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
