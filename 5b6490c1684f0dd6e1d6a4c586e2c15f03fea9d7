@@ -176,6 +176,24 @@
       "parentUuid": "2935058f_0f9082ed",
       "revId": "5b6490c1684f0dd6e1d6a4c586e2c15f03fea9d7",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f442ddd4_79bf516d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 29732
+      },
+      "writtenOn": "2023-09-10T07:19:10Z",
+      "side": 1,
+      "message": "Now there are some uninitialized variables in `IconProvider.java`:\n\n```\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:137: error: cannot find symbol\n            icon \u003d loader.apply(obj, param);\n                                ^\n  symbol:   variable obj\n  location: class IconProvider\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:137: error: cannot find symbol\n            icon \u003d loader.apply(obj, param);\n                                     ^\n  symbol:   variable param\n  location: class IconProvider\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:137: error: cannot find symbol\n            icon \u003d loader.apply(obj, param);\n                   ^\n  symbol:   variable loader\n  location: class IconProvider\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:299: error: cannot find symbol\n            Utilities.getPrefs(mContext).registerOnSharedPreferenceChangeListener(this);\n            ^\n  symbol:   variable Utilities\n  location: class IconProvider.IconChangeReceiver\n4 errors\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:137: error: cannot find symbol\n            icon \u003d loader.apply(obj, param);\n                                ^\n  symbol:   variable obj\n  location: class IconProvider\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:137: error: cannot find symbol\n            icon \u003d loader.apply(obj, param);\n                                     ^\n  symbol:   variable param\n  location: class IconProvider\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:137: error: cannot find symbol\n            icon \u003d loader.apply(obj, param);\n                   ^\n  symbol:   variable loader\n  location: class IconProvider\nframeworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/IconProvider.java:299: error: cannot find symbol\n            Utilities.getPrefs(mContext).registerOnSharedPreferenceChangeListener(this);\n            ^\n  symbol:   variable Utilities\n  location: class IconProvider.IconChangeReceiver\n4 errors\n```",
+      "parentUuid": "8f151122_ea4282a4",
+      "revId": "5b6490c1684f0dd6e1d6a4c586e2c15f03fea9d7",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
