@@ -7,6 +7,7 @@ import static android.graphics.drawable.AdaptiveIconDrawable.getExtraInsetFracti
 
 import static com.android.launcher3.icons.BitmapInfo.FLAG_CLONE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_INSTANT;
+import static com.android.launcher3.icons.BitmapInfo.FLAG_PRIVATE;
 import static com.android.launcher3.icons.BitmapInfo.FLAG_WORK;
 import static com.android.launcher3.icons.ShadowGenerator.BLUR_FACTOR;
 
@@ -29,10 +30,11 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableWrapper;
 import android.graphics.drawable.InsetDrawable;
 import android.os.Build;
 import android.os.UserHandle;
-import android.util.SparseBooleanArray;
+import android.util.SparseArray;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
@@ -41,6 +43,7 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.icons.BitmapInfo.Extender;
 import com.android.launcher3.util.FlagOp;
+import com.android.launcher3.util.UserIconInfo;
 
 import java.lang.annotation.Retention;
 import java.util.Objects;
@@ -52,6 +55,7 @@ import java.util.Objects;
 public class BaseIconFactory implements AutoCloseable {
 
     private static final int DEFAULT_WRAPPER_BACKGROUND = Color.WHITE;
+    private static final float LEGACY_ICON_SCALE = .7f * (1f / (1 + 2 * getExtraInsetFraction()));
 
     public static final int MODE_DEFAULT = 0;
     public static final int MODE_ALPHA = 1;
@@ -69,7 +73,7 @@ public class BaseIconFactory implements AutoCloseable {
     private final Rect mOldBounds = new Rect();
 
     @NonNull
-    private final SparseBooleanArray mIsUserBadged = new SparseBooleanArray();
+    private final SparseArray<UserIconInfo> mCachedUserInfo = new SparseArray<>();
 
     @NonNull
     protected final Context mContext;
@@ -255,25 +259,35 @@ public class BaseIconFactory implements AutoCloseable {
                 op = op.addFlag(FLAG_INSTANT);
             }
 
-            if (options.mUserHandle != null) {
-                int key = options.mUserHandle.hashCode();
-                boolean isBadged;
-                int index;
-                if ((index = mIsUserBadged.indexOfKey(key)) >= 0) {
-                    isBadged = mIsUserBadged.valueAt(index);
-                } else {
-                    // Check packageManager if the provided user needs a badge
-                    NoopDrawable d = new NoopDrawable();
-                    isBadged = (d != mPm.getUserBadgedIcon(d, options.mUserHandle));
-                    mIsUserBadged.put(key, isBadged);
-                }
-                // Set the clone profile badge flag in case it is present.
-                op = op.setFlag(FLAG_CLONE, isBadged && options.mIsCloneProfile);
-                // Set the Work profile badge for all other cases.
-                op = op.setFlag(FLAG_WORK, isBadged && !options.mIsCloneProfile);
+            UserIconInfo info = options.mUserIconInfo;
+            if (info == null && options.mUserHandle != null) {
+                info = getUserInfo(options.mUserHandle);
+            }
+            if (info != null) {
+                op = op.setFlag(FLAG_WORK, info.isWork());
+                op = op.setFlag(FLAG_CLONE, info.isCloned());
+                op = op.setFlag(FLAG_PRIVATE, info.isPrivate());
             }
         }
         return op;
+    }
+
+    @NonNull
+    protected UserIconInfo getUserInfo(@NonNull UserHandle user) {
+        int key = user.hashCode();
+        UserIconInfo info = mCachedUserInfo.get(key);
+        /*
+        * We do not have the ability to distinguish between different badged users here.
+        * As such all badged users will have the work profile badge applied.
+        */
+        if (info == null) {
+            // Simple check to check if the provided user is work profile or not based on badging
+            NoopDrawable d = new NoopDrawable();
+            boolean isWork = (d != mPm.getUserBadgedIcon(d, user));
+            info = new UserIconInfo(user, isWork ? UserIconInfo.TYPE_WORK : UserIconInfo.TYPE_MAIN);
+            mCachedUserInfo.put(key, info);
+        }
+        return info;
     }
 
     @NonNull
@@ -309,24 +323,19 @@ public class BaseIconFactory implements AutoCloseable {
         if (icon == null) {
             return null;
         }
-        float scale = 1f;
 
+        float scale;
         if (shrinkNonAdaptiveIcons && !(icon instanceof AdaptiveIconDrawable)) {
-            if (mWrapperIcon == null) {
-                mWrapperIcon = mContext.getDrawable(R.drawable.adaptive_icon_drawable_wrapper)
-                        .mutate();
-            }
-            AdaptiveIconDrawable dr = (AdaptiveIconDrawable) mWrapperIcon;
+            EmptyWrapper foreground = new EmptyWrapper();
+            AdaptiveIconDrawable dr = new AdaptiveIconDrawable(
+                    new ColorDrawable(mWrapperBackgroundColor), foreground);
             dr.setBounds(0, 0, 1, 1);
             boolean[] outShape = new boolean[1];
             scale = getNormalizer().getScale(icon, outIconBounds, dr.getIconMask(), outShape);
             if (!outShape[0]) {
-                FixedScaleDrawable fsd = ((FixedScaleDrawable) dr.getForeground());
-                fsd.setDrawable(icon);
-                fsd.setScale(scale);
+                foreground.setDrawable(createScaledDrawable(icon, scale * LEGACY_ICON_SCALE));
                 icon = dr;
                 scale = getNormalizer().getScale(icon, outIconBounds, null, null);
-                ((ColorDrawable) dr.getBackground()).setColor(mWrapperBackgroundColor);
             }
         } else {
             scale = getNormalizer().getScale(icon, outIconBounds, null, null);
@@ -334,6 +343,46 @@ public class BaseIconFactory implements AutoCloseable {
 
         outScale[0] = scale;
         return icon;
+    }
+
+    /**
+     * Returns a drawable which draws the original drawable at a fixed scale
+     */
+    private Drawable createScaledDrawable(@NonNull Drawable main, float scale) {
+        float h = main.getIntrinsicHeight();
+        float w = main.getIntrinsicWidth();
+        float scaleX = scale;
+        float scaleY = scale;
+        if (h > w && w > 0) {
+            scaleX *= w / h;
+        } else if (w > h && h > 0) {
+            scaleY *= h / w;
+        }
+        scaleX = (1 - scaleX) / 2;
+        scaleY = (1 - scaleY) / 2;
+        return new InsetDrawable(main, scaleX, scaleY, scaleX, scaleY);
+    }
+
+    /**
+     * Wraps the provided icon in an adaptive icon drawable
+     */
+    public AdaptiveIconDrawable wrapToAdaptiveIcon(@NonNull Drawable icon) {
+        if (icon instanceof AdaptiveIconDrawable aid) {
+            return aid;
+        } else {
+            EmptyWrapper foreground = new EmptyWrapper();
+            AdaptiveIconDrawable dr = new AdaptiveIconDrawable(
+                    new ColorDrawable(mWrapperBackgroundColor), foreground);
+            dr.setBounds(0, 0, 1, 1);
+            boolean[] outShape = new boolean[1];
+            float scale = getNormalizer().getScale(icon, null, dr.getIconMask(), outShape);
+            if (!outShape[0]) {
+                foreground.setDrawable(createScaledDrawable(icon, scale * LEGACY_ICON_SCALE));
+            } else {
+                foreground.setDrawable(createScaledDrawable(icon, 1 - getExtraInsetFraction()));
+            }
+            return dr;
+        }
     }
 
     @NonNull
@@ -376,6 +425,7 @@ public class BaseIconFactory implements AutoCloseable {
         mOldBounds.set(icon.getBounds());
 
         if (icon instanceof AdaptiveIconDrawable) {
+            // We are ignoring KEY_SHADOW_DISTANCE because regular icons ignore this at the moment b/298203449
             int offset = Math.max((int) Math.ceil(BLUR_FACTOR * size),
                     Math.round(size * (1 - scale) / 2));
             // b/211896569: AdaptiveIconDrawable do not work properly for non top-left bounds
@@ -468,12 +518,12 @@ public class BaseIconFactory implements AutoCloseable {
 
         boolean mIsInstantApp;
 
-        boolean mIsCloneProfile;
-
         @BitmapGenerationMode
         int mGenerationMode = MODE_WITH_SHADOW;
 
         @Nullable UserHandle mUserHandle;
+        @Nullable
+        UserIconInfo mUserIconInfo;
 
         @ColorInt
         @Nullable Integer mExtractedColor;
@@ -493,6 +543,15 @@ public class BaseIconFactory implements AutoCloseable {
         @NonNull
         public IconOptions setUser(@Nullable final UserHandle user) {
             mUserHandle = user;
+            return this;
+        }
+
+        /**
+         * User for this icon, in case of badging
+         */
+        @NonNull
+        public IconOptions setUser(@Nullable final UserIconInfo user) {
+            mUserIconInfo = user;
             return this;
         }
 
@@ -521,15 +580,6 @@ public class BaseIconFactory implements AutoCloseable {
          */
         public IconOptions setBitmapGenerationMode(@BitmapGenerationMode int generationMode) {
             mGenerationMode = generationMode;
-            return this;
-        }
-
-        /**
-         * Used to determine the badge type for this icon.
-         */
-        @NonNull
-        public IconOptions setIsCloneProfile(boolean isCloneProfile) {
-            mIsCloneProfile = isCloneProfile;
             return this;
         }
     }
@@ -613,6 +663,19 @@ public class BaseIconFactory implements AutoCloseable {
                     bounds.exactCenterX() - mTextBounds.exactCenterX(),
                     bounds.exactCenterY() - mTextBounds.exactCenterY(),
                     mTextPaint);
+        }
+    }
+
+    private static class EmptyWrapper extends DrawableWrapper {
+
+        EmptyWrapper() {
+            super(new ColorDrawable());
+        }
+
+        @Override
+        public ConstantState getConstantState() {
+            Drawable d = getDrawable();
+            return d == null ? null : d.getConstantState();
         }
     }
 }

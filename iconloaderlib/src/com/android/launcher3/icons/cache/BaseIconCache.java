@@ -21,6 +21,7 @@ import static com.android.launcher3.icons.BaseIconFactory.getFullResDefaultActiv
 import static com.android.launcher3.icons.BitmapInfo.LOW_RES_ICON;
 import static com.android.launcher3.icons.GraphicsUtils.flattenBitmap;
 import static com.android.launcher3.icons.GraphicsUtils.setColorAlphaBound;
+import static com.android.launcher3.icons.cache.IconCacheUpdateHandler.ICON_UPDATE_TOKEN;
 
 import static java.util.Objects.requireNonNull;
 
@@ -329,9 +330,11 @@ public abstract class BaseIconCache {
         if (entry.bitmap.isNullOrLowRes()) return;
 
         CharSequence entryTitle = cachingLogic.getLabel(object);
-        if (entryTitle == null) {
-            Log.wtf(TAG, "No label returned from caching logic instance: " + cachingLogic);
-            entryTitle = "";
+        if (TextUtils.isEmpty(entryTitle)) {
+            if (entryTitle == null) {
+                Log.wtf(TAG, "No label returned from caching logic instance: " + cachingLogic);
+            }
+            entryTitle = componentName.getPackageName();;
         }
         entry.title = entryTitle;
 
@@ -490,13 +493,23 @@ public abstract class BaseIconCache {
             @NonNull final T object, @NonNull final CacheEntry entry,
             @NonNull final CachingLogic<T> cachingLogic, @NonNull final UserHandle user) {
         entry.title = cachingLogic.getLabel(object);
+        if (TextUtils.isEmpty(entry.title)) {
+            entry.title = cachingLogic.getComponent(object).getPackageName();
+        }
         entry.contentDescription = getUserBadgedLabel(
                 cachingLogic.getDescription(object, entry.title), user);
     }
 
-    public synchronized void clear() {
+    public synchronized void clearMemoryCache() {
         assertWorkerThread();
-        mIconDb.clear();
+        mCache.clear();
+    }
+
+    /**
+     * Returns true if an icon update is in progress
+     */
+    public boolean isIconUpdateInProgress() {
+        return mWorkerHandler.hasMessages(0, ICON_UPDATE_TOKEN);
     }
 
     /**
