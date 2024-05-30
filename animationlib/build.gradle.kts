@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.android.launcher3.icons"
+    namespace = "com.android.app.animation"
     compileSdk = 36
 
     defaultConfig {
@@ -20,8 +20,8 @@ android {
     sourceSets {
         named("main") {
             java.srcDirs("src")
-            manifest.srcFile("AndroidManifest.xml")
             res.srcDirs("res")
+            manifest.srcFile("AndroidManifest.xml")
         }
     }
 
@@ -32,6 +32,6 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.core.animation)
     implementation(libs.androidx.core)
-    implementation(files("${rootDir}/libs/com_android_launcher3_flags_lib.jar"))
 }
