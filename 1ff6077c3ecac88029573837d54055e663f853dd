@@ -52,6 +52,23 @@
       "parentUuid": "6509b470_8edda7b7",
       "revId": "1ff6077c3ecac88029573837d54055e663f853dd",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "debf7acb_597a03b9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 16185
+      },
+      "writtenOn": "2024-08-24T20:33:35Z",
+      "side": 1,
+      "message": "next time pls add people when it\u0027s functional",
+      "revId": "1ff6077c3ecac88029573837d54055e663f853dd",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
