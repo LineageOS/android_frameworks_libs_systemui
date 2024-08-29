@@ -104,6 +104,23 @@
       "message": "I have tested it just now and it works",
       "revId": "1ff6077c3ecac88029573837d54055e663f853dd",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1339254_fb92f998",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 32911
+      },
+      "writtenOn": "2024-08-29T11:07:44Z",
+      "side": 1,
+      "message": "Please take a look at this.",
+      "revId": "1ff6077c3ecac88029573837d54055e663f853dd",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
