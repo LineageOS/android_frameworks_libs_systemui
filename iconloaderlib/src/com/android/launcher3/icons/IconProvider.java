@@ -132,10 +132,8 @@ public class IconProvider {
             icon = fallback.get();
             if (ATLEAST_T && icon instanceof AdaptiveIconDrawable && td != null) {
                 AdaptiveIconDrawable aid = (AdaptiveIconDrawable) icon;
-                if  (aid.getMonochrome() == null) {
-                    icon = new AdaptiveIconDrawable(aid.getBackground(),
-                            aid.getForeground(), td.loadPaddedDrawable());
-                }
+                icon = new AdaptiveIconDrawable(aid.getBackground(),
+                        aid.getForeground(), td.loadPaddedDrawable());
             }
         }
         return icon;
