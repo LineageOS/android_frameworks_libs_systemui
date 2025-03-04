@@ -51,6 +51,24 @@
       "message": "You could abandon the commit as there is zero changes to the code even having a blank commit, aint gonna do nothing",
       "revId": "7413eebf8d7d08f560409264016152ffbfcb4f1c",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f5543ae0_9b201be3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 34926
+      },
+      "writtenOn": "2025-03-04T07:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9b4faec_89772c16",
+      "revId": "7413eebf8d7d08f560409264016152ffbfcb4f1c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
