@@ -16,6 +16,24 @@
       "message": "Why is this put up if there is no code changes even?",
       "revId": "7413eebf8d7d08f560409264016152ffbfcb4f1c",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ae789774_e9e1099b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 34926
+      },
+      "writtenOn": "2025-03-04T06:00:31Z",
+      "side": 1,
+      "message": "\u003e Why is this put up if there is no code changes even?\n\nTo force monochrome icon",
+      "parentUuid": "e787cce1_10e20bf9",
+      "revId": "7413eebf8d7d08f560409264016152ffbfcb4f1c",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
