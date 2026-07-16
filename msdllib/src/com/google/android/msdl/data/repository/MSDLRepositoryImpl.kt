@@ -272,7 +272,7 @@ internal class MSDLRepositoryImpl : MSDLRepository {
                             },
                             VibrationEffect.createWaveform(
                                 longArrayOf(10, 20, 20, 10),
-                                intArrayOf(10, 30, 50, 10),
+                                intArrayOf(1, 2, 3, 1),
                                 -1,
                             ),
                         )
